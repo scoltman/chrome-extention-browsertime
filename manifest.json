@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+
+  "name": "browser time monitor",
+  "description": "This extension monitors which sites are visited and provides basic times",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
