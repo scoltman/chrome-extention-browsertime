@@ -22,7 +22,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get(STORE_NAME, function(times){
-      var html = '<ol style="padding-left: 0;list-style: none;">';
+      var html;
       var sortable = [];
       var times = times['browserTimes'];
 
@@ -33,11 +33,28 @@
       sortable.sort(function(a, b) {
           return  b[1] - a[1];
       });
-      for(var i=0; i < sortable.length; i++){
-        html = html + '<li>' + sortable[i][0] + ': ' + msToTime(sortable[i][1]) + '</li>';
+
+
+      if(sortable.length > 0){
+        html = '<ol style="padding-left: 0;list-style: none;">';
+        for(var i=0; i < sortable.length; i++){
+          html = html + '<li>' + sortable[i][0] + ': ' + msToTime(sortable[i][1]) + '</li>';
+        }
+        html = html + '</ol>';
+        renderContent('<h4>Top Sites</h4>'+html);
+      } else {
+        renderContent('<h4>No History</h4>');
       }
-      html = html + '</ol>';
-      renderContent('<h4>Top Sites</h4>'+html);
     });
+
+    var resetButton = document.getElementById('resetButton');
+    resetButton.addEventListener('click', function(){
+      console.log('hello simon');
+        var store = {};
+        store[STORE_NAME] = {};
+        chrome.storage.local.set(store, function(){});
+        renderContent('<h4>No History</h4>');
+    });
+
   });
 }();

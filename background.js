@@ -4,31 +4,37 @@
     var inFocus = true;
     var previousHost,currentHost,time,count,t;
 
-
     var storage =  {
       save : function(data){
         var store = {};
         store[STORE_NAME] = data;
+        console.log(data);
         chrome.storage.local.set(store, function(){});
+        //console.log('saving time');
       }
     };
 
     function startTimer(){
-      if(count > 0){
-        stopTimer();
-      }
-      count = 0;
+      //console.log('starting timer');
+      count = -1;
       t = setInterval(function(){
-        count += 1000;
+        if(count == -1) {
+          count = 0;
+        } else {
+          count += 1000;
+        }
       },1000);
     }
 
-    function stopTimer(){
-      clearInterval(t);
-      if(count > 0){
-        setStorage(currentHost, count);
+    function stopTimer(host){
+      if( host && count) {
+        //console.log(host +': ' +  count);
+        clearInterval(t);
+        if(count > 0){
+          setStorage(host, count);
+        }
+        count = 0;
       }
-      count = 0;
     }
 
 
@@ -88,17 +94,18 @@
           storage.save(browserTimes);
         }
       });
-
+      console.log(browserTimes);
     }
 
     //listen for browser window to lose focus
     chrome.windows.onFocusChanged.addListener(function(window) {
         if (window == chrome.windows.WINDOW_ID_NONE) {
             inFocus = false;
-            stopTimer();
+            stopTimer(currentHost);
             //stop times and update log
         } else {
             inFocus = true;
+            startTimer();
         }
     });
 
@@ -106,7 +113,7 @@
     chrome.tabs.onActivated.addListener(function(activeInfo) {
         if(activeInfo && activeInfo.tabId){
           chrome.tabs.get(activeInfo.tabId,function(tab){
-            previousHost = currentHost;
+            stopTimer(currentHost); // should be the value of tab host before change
             currentHost = getHostname(tab.url);
             startTimer();
           })
@@ -115,8 +122,9 @@
 
     //listen for current tab to be changed
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-      previousHost = currentHost;
+      stopTimer(currentHost); // should be the value of tab host before change
       currentHost = getHostname(tab.url);
       startTimer();
     });
+
 }();
